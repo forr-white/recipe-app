@@ -1,7 +1,7 @@
 // config.js
 const SITE_CONFIG = {
-  title: "Your Recipe Index",
-  author: "Your Name",
+  title: "Forrest's Recipe Index",
+  author: "Forrest",
   defaultImagePath: "images/default.jpg",
   categories: [
     "appetizers", "bread", "breakfast", "desserts", 
