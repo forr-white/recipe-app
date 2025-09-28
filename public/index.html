@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title id="site-title">Recipe Index</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1 id="header-title">Recipe Index</h1>
+  </header>
+
+  <!-- Filters -->
+  <label for="filter-category">Category:</label>
+  <select id="filter-category">
+    <option value="">All</option>
+  </select>
+  <input type="text" id="search" placeholder="Search recipes">
+
+  <ul id="recipe-list"></ul>
+
+  <!-- Recipe Builder -->
+  <details>
+    <summary>➕ Create a New Recipe</summary>
+    <div class="builder">
+      <label for="new-name">Recipe Name</label>
+      <input type="text" id="new-name">
+      <label for="new-image">Image URL</label>
+      <input type="text" id="new-image" placeholder="images/recipe.jpg">
+      <label for="new-category">Category</label>
+      <select id="new-category"></select>
+      <label for="new-ingredients">Ingredients (one per line)</label>
+      <textarea id="new-ingredients"></textarea>
+      <label for="new-directions">Directions (one step per line)</label>
+      <textarea id="new-directions"></textarea>
+      <label for="new-notes">Notes (optional, one per line)</label>
+      <textarea id="new-notes"></textarea>
+      <button id="generate-btn">Generate Recipe File</button>
+    </div>
+  </details>
+</div>
+
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
