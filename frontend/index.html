@@ -1,48 +1,114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title id="site-title">Recipe Index</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Forrest's Recipe Index</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1 id="header-title">Recipe Index</h1>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">Forrest's Recipe Index</div>
+    <nav class="nav">
+      <a href="#">Home</a>
+      <a href="#builder">Add Recipe</a>
+    </nav>
   </header>
 
-  <!-- Filters -->
-  <label for="filter-category">Category:</label>
-  <select id="filter-category">
-    <option value="">All</option>
-  </select>
-  <input type="text" id="search" placeholder="Search recipes">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Find & Build Your Favorite Recipes</h1>
+      <p>Browse recipes by category, cuisine, search by name, or create your own custom recipe file.</p>
+      <button onclick="document.getElementById('builder').scrollIntoView({behavior: 'smooth'})">Create a Recipe</button>
+    </div>
+    <div class="hero-image">
+      <img src="../odin-recipes/images/YourOpinionIsNotPartOfTheRecipe.svg" alt="Recipe illustration" style="max-width:100%; height:auto; border-radius:8px;">
+    </div>
+  </section>
 
-  <ul id="recipe-list"></ul>
+  <!-- Info Section -->
+  <section class="info">
+    <h2>Recipe Library</h2>
+
+    <!-- Filters -->
+    <div style="max-width:600px; margin:0 auto 30px auto;">
+      <select id="filter-category">
+        <option value="">All Categories</option>
+        <option value="appetizers">Appetizers</option>
+        <option value="bread">Bread</option>
+        <option value="breakfast">Breakfast</option>
+        <option value="desserts">Desserts</option>
+        <option value="dinner">Dinner</option>
+        <option value="drinks">Drinks</option>
+        <option value="sauce">Sauce</option>
+        <option value="sides">Sides</option>
+        <option value="soups">Soups</option>
+      </select>
+      <input type="text" id="search" placeholder="Search recipes by name...">
+    </div>
+
+    <!-- Recipe List -->
+    <ul id="recipe-list" class="info-cards"></ul>
+  </section>
 
   <!-- Recipe Builder -->
-  <details>
-    <summary>➕ Create a New Recipe</summary>
-    <div class="builder">
+  <section id="builder" class="cta">
+  <div class="cta-left">
+    <h3>Create a New Recipe</h3>
+    <p>Fill out the form below to generate a custom recipe page you can download and save.</p>
+  </div>
+<div class="cta-right">
       <label for="new-name">Recipe Name</label>
       <input type="text" id="new-name">
-      <label for="new-image">Image URL</label>
-      <input type="text" id="new-image" placeholder="images/recipe.jpg">
+
+      <label for="new-image">Image URL (optional)</label>
+      <input type="text" id="new-image" placeholder="https://example.com/recipe.jpg">
+
       <label for="new-category">Category</label>
-      <select id="new-category"></select>
+      <select id="new-category">
+        <option value="">Select a Category</option>
+        <option value="appetizers">Appetizers</option>
+        <option value="bread">Bread</option>
+        <option value="breakfast">Breakfast</option>
+        <option value="desserts">Desserts</option>
+        <option value="dinner">Dinner</option>
+        <option value="drinks">Drinks</option>
+        <option value="sauce">Sauce</option>
+        <option value="sides">Sides</option>
+        <option value="soups">Soups</option>
+      </select>
+
       <label for="new-ingredients">Ingredients (one per line)</label>
       <textarea id="new-ingredients"></textarea>
-      <label for="new-directions">Directions (one per line)</label>
+
+      <label for="new-directions">Directions (one step per line)</label>
       <textarea id="new-directions"></textarea>
+
       <label for="new-notes">Notes (optional, one per line)</label>
       <textarea id="new-notes"></textarea>
+
       <button id="generate-btn">Generate Recipe File</button>
     </div>
-  </details>
-</div>
+  </section>
 
-<script src="config.js"></script>
-<script src="js/main.js"></script>
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 Forrest's Recipe Index</p>
+  </footer>
+
+  <!-- Back to top button -->
+  <button id="back-to-top" aria-label="Back to top">
+    <svg viewBox="0 0 24 24">
+      <path d="M12 4l-8 8h6v8h4v-8h6z"/>
+    </svg>
+  </button>
+
+  <!-- Scripts (unchanged) -->
+  <script src="recipes.js"></script>
+
 </body>
 </html>
