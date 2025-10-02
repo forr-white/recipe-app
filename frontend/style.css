@@ -1,4 +1,3 @@
-/* This is for the Project: Landing Page for the Odin Project */
 * {
   margin: 0;
   padding: 0;
@@ -139,24 +138,24 @@ body {
   border-radius: 8px;
 
   display: flex;
-  flex-direction: row;          /* side-by-side layout */
-  justify-content: space-between; /* spread left and right */
-  align-items: flex-start;      /* align to the top */
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 40px;
 
   color: #F9FAF8;
-  width: 100%;                  /* span full width of page */
+  width: 100%;
   box-sizing: border-box;
 }
 
 .cta-left {
-  flex: 1;                      /* take up remaining space */
+  flex: 1;
   text-align: left;
 }
 
 .cta-right {
-  flex: 1;                      /* form column */
-  max-width: 480px;             /* keep form from getting too wide */
+  flex: 1;
+  max-width: 480px;
 }
 
 .cta-right label {
@@ -196,7 +195,7 @@ body {
   background-color: #0369a1;
   color: white;
   cursor: pointer;
-  display: flex; /* hidden by default */
+  display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -210,7 +209,7 @@ body {
 }
 
 #back-to-top.show {
-  display: flex; /* show button */
+  display: flex;
 }
 
 
