@@ -1,3 +1,14 @@
+// Automatically detect backend base URL
+const baseURL = (() => {
+  // If running locally
+  if (window.location.hostname === "localhost") {
+    return "http://localhost:5000"; // local backend
+  }
+
+  // Otherwise, point to your deployed backend
+  return "https://your-backend.onrender.com"; 
+})();
+
 const listEl = document.getElementById("recipe-list");
 const searchInput = document.getElementById("search");
 const filterCategory = document.getElementById("filter-category");
@@ -8,7 +19,7 @@ let recipes = [];
 
 // Fetch recipes from server
 async function loadRecipes() {
-  const res = await fetch('http://localhost:5000/recipes');
+  const res = await fetch(`${baseURL}/recipes`);
   recipes = await res.json();
   renderList();
 }
@@ -49,8 +60,7 @@ generateBtn.addEventListener("click", async () => {
 
   const recipe = { name, image, category, ingredients, directions, notes };
 
-  // Save to backend
-  const res = await fetch('http://localhost:5000/recipes', {
+  const res = await fetch(`${baseURL}/recipes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(recipe)

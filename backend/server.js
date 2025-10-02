@@ -1,30 +1,30 @@
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const Recipe = require('./models/recipe'); // import your schema
 
-const app = express();
-app.use(cors());
+const app = express(); // ✅ create the app first
+
+// Enable CORS for specific origins
+app.use(cors({
+  origin: ["http://localhost:3000", "https://your-frontend.netlify.app"]
+}));
+
+// Middleware
 app.use(bodyParser.json());
 
-// Connect to MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/recipes', {
-  useNewUrlParser: true,
+// MongoDB connection
+const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/recipes';
+
+mongoose.connect(mongoURI, { 
+  useNewUrlParser: true, 
   useUnifiedTopology: true
-}).then(() => console.log("MongoDB connected"))
-  .catch(err => console.log(err));
-
-// Recipe Schema
-const RecipeSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  image: String,
-  category: String,
-  ingredients: [String],
-  directions: [String],
-  notes: [String]
-});
-
-const Recipe = mongoose.model('Recipe', RecipeSchema);
+})
+.then(() => console.log(`MongoDB connected: ${mongoURI}`))
+.catch(err => console.log("MongoDB connection error:", err));
 
 // API Endpoints
 app.get('/recipes', async (req, res) => {
@@ -51,4 +51,6 @@ app.delete('/recipes/:id', async (req, res) => {
   }
 });
 
-app.listen(5000, () => console.log('Server running on port 5000'));
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
