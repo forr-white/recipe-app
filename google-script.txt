@@ -1,0 +1,188 @@
+// Code.gs (Google Apps Script)
+
+function doGet() {
+  const sheet = SpreadsheetApp.openById('SHEET_ID').getSheets()[0];
+  const rows = sheet.getDataRange().getValues();
+  const headers = rows.shift().map(h => h.toString().trim().toLowerCase());
+  const data = rows.map(r => {
+    let obj = {};
+    headers.forEach((h, i) => obj[h] = r[i]);
+    return obj;
+  });
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// =======================================================
+// Cook Anything Kitchen - Google Sheets + GitHub Bridge
+// =======================================================
+
+// 1️⃣ Main entry point (Apps Script calls this automatically when the builder posts)
+function doPost(e) {
+  try {
+    // --- Save basic info to Google Sheet ---
+    const sheet = SpreadsheetApp.openById('SHEET_ID').getSheets()[0];
+
+    const name = e.parameter.name || "";
+    const credit = e.parameter.credit || "";
+    const category = e.parameter.category || "";
+    const image = e.parameter.image || "";
+    const link = e.parameter.link || "";
+    const cuisine = e.parameter.cuisine || "";
+    const tags = e.parameter.tags || "";
+
+    // Only store essential metadata (no nutrition)
+    sheet.appendRow([
+      new Date(),
+      name,
+      category,
+      image,
+      link,
+      cuisine,
+      tags
+    ]);
+
+    // --- Nutrition values (used only for HTML) ---
+    const nutrition = {
+      servingSize: e.parameter.nutrition_serving_size || "",
+      calories: e.parameter.nutrition_calories || "",
+      fat: e.parameter.nutrition_fat || "",
+      carbs: e.parameter.nutrition_carbs || "",
+      protein: e.parameter.nutrition_protein || ""
+    };
+
+    // --- Build recipe HTML with nutrition section ---
+    const htmlContent = buildRecipeHtml({
+      name, credit, category, cuisine, image,
+      ingredients: e.parameter.ingredients,
+      directions: e.parameter.directions,
+      notes: e.parameter.notes,
+      nutrition
+    });
+
+    // --- Push recipe file to GitHub ---
+    const encoded = Utilities.base64Encode(htmlContent, Utilities.Charset.UTF_8);
+    const token = PropertiesService.getScriptProperties().getProperty("GITHUB_TOKEN");
+    const user = PropertiesService.getScriptProperties().getProperty("GITHUB_USER");
+    const repo = PropertiesService.getScriptProperties().getProperty("GITHUB_REPO");
+    const fileName = name ? name.trim().replace(/\s+/g, "-").toLowerCase() + ".html" : "recipe.html";
+    const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/recipes/${fileName}`;
+
+    const payload = {
+      message: `Add new recipe: ${name}`,
+      content: encoded,
+      branch: "main"
+    };
+
+    const options = {
+      method: "put",
+      headers: {
+        Authorization: `token ${token}`,
+        "User-Agent": "Google-Apps-Script"
+      },
+      muteHttpExceptions: true,
+      payload: JSON.stringify(payload)
+    };
+
+    const response = UrlFetchApp.fetch(apiUrl, options);
+    const result = JSON.parse(response.getContentText());
+
+    if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", github: "uploaded", result }))
+        .setMimeType(ContentService.MimeType.JSON);
+    } else {
+      return ContentService.createTextOutput(JSON.stringify({ status: "partial", github: "failed", message: result.message }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: "error", message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Build the recipe HTML
+function buildRecipeHtml(data) {
+  const name = data.name || "Untitled Recipe";
+  const credit = data.credit || "";
+  const category = data.category || "";
+  const cuisine = data.cuisine || "";
+  const image = data.image || "";
+  const ingredients = JSON.parse(data.ingredients || "[]");
+  const directions = JSON.parse(data.directions || "[]");
+  const notes = JSON.parse(data.notes || "[]");
+  const nutrition = data.nutrition || {};
+
+  const ingredientsList = ingredients.map(i => `<li>${escapeHtml(i)}</li>`).join("");
+  const directionsList = directions.map(d => `<li>${escapeHtml(d)}</li>`).join("");
+  const notesList = notes.length
+    ? `<section class="recipe-section notes"><h2>Notes</h2><ul>${notes.map(n => `<li>${escapeHtml(n)}</li>`).join("")}</ul></section>`
+    : "";
+
+  const nutritionHtml =
+    (nutrition.servingSize || nutrition.calories || nutrition.fat || nutrition.carbs || nutrition.protein)
+      ? `
+  <section class="recipe-section nutrition">
+    <h2>Nutritional Information</h2>
+    <div class="nutrition-card">
+      ${nutrition.servingSize ? `<p><strong>Serving Size:</strong> ${escapeHtml(nutrition.servingSize)}</p>` : ""}
+      ${nutrition.calories ? `<p><strong>Calories:</strong> ${escapeHtml(nutrition.calories)}</p>` : ""}
+      ${nutrition.fat ? `<p><strong>Fat:</strong> ${escapeHtml(nutrition.fat)} g</p>` : ""}
+      ${nutrition.carbs ? `<p><strong>Carbohydrates:</strong> ${escapeHtml(nutrition.carbs)} g</p>` : ""}
+      ${nutrition.protein ? `<p><strong>Protein:</strong> ${escapeHtml(nutrition.protein)} g</p>` : ""}
+    </div>
+  </section>`
+      : "";
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(name)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="recipe.css">
+</head>
+<body>
+<header class="recipe-header">
+  <a href="../index.html"><img src="../images/logo.svg" alt="Your Logo Title"></a>
+  <nav><a href="../index.html">Home</a> | <a href="../recipe-builder.html">Recipe Builder</a> | <a href="https://cookanythingkitchen.com/license.html">License</a></nav>
+</header>
+<main class="recipe-container">
+  <h1 class="recipe-title">${escapeHtml(name)}</h1>
+  <p class="recipe-credit">Submitted by ${escapeHtml(credit || "Cook Anything Kitchen")}
+  <div class="recipe-meta">${escapeHtml(category)}${cuisine ? " • " + escapeHtml(cuisine) : ""}</div>
+  ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(name)}" class="recipe-image">` : ""}
+  <section class="recipe-section"><h2>Ingredients</h2><ul>${ingredientsList}</ul></section>
+  <section class="recipe-section"><h2>Directions</h2><ol>${directionsList}</ol></section>
+  ${notesList}
+  ${nutritionHtml}
+</main>
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-logo">
+      <a href="../index.html"><img src="../images/logo.svg" alt="Site Logo"></a>
+    </div>
+    <div class="footer-nav">
+      <a href="../index.html">Home</a>
+      <a href="../recipe-builder.html">Recipe Builder</a>
+      <a href="https://cookanythingkitchen.com/license.html">License</a>
+    </div>
+    <p class="footer-copy">&copy; 2025 Cook Anything Kitchen. All rights reserved.</p>
+  </div>
+</footer>
+<script src="../config-check.js" defer></script>
+</body>
+</html>`;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}

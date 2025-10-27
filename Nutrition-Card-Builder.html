@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nutritional Info Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: 'Roboto', sans-serif;
+  background: #f1f5f9;
+  color: #111827;
+  padding: 20px;
+}
+h1 { text-align: center; }
+.generator {
+  max-width: 500px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.generator label {
+  font-weight: 500;
+}
+.generator input {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f8fafc;
+}
+#generateBtn {
+  background: #0369a1;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+}
+#generateBtn:hover { background: #0284c7; }
+#output {
+  margin-top: 20px;
+  background: #e0f2fe;
+  padding: 16px;
+  border-radius: 12px;
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+</style>
+</head>
+<body>
+
+<h1>Nutritional Info Generator</h1>
+<div class="generator">
+  <label>Serving Size:</label>
+  <input type="text" id="servingSize" placeholder="e.g. 1 serving">
+
+  <label>Calories:</label>
+  <input type="text" id="calories" placeholder="e.g. 230">
+
+  <label>Fat (g):</label>
+  <input type="text" id="fat" placeholder="e.g. 8">
+
+  <label>Carbs (g):</label>
+  <input type="text" id="carbs" placeholder="e.g. 27">
+
+  <label>Protein (g):</label>
+  <input type="text" id="protein" placeholder="e.g. 5">
+
+  <button id="generateBtn">Generate Nutritional Card</button>
+</div>
+
+<pre id="output"></pre>
+
+<script>
+const generateBtn = document.getElementById('generateBtn');
+generateBtn.addEventListener('click', () => {
+  const servingSize = document.getElementById('servingSize').value;
+  const calories = document.getElementById('calories').value;
+  const fat = document.getElementById('fat').value;
+  const carbs = document.getElementById('carbs').value;
+  const protein = document.getElementById('protein').value;
+
+  const cardHTML = `<section class="recipe-section nutrition">
+  <h2>Nutrition</h2>
+  <div class="nutrition-card">
+    ${servingSize ? `<p><strong>Serving Size:</strong> ${servingSize}</p>` : ""}
+    ${calories ? `<p><strong>Calories:</strong> ${calories}</p>` : ""}
+    ${fat ? `<p><strong>Fat:</strong> ${fat} g</p>` : ""}
+    ${carbs ? `<p><strong>Carbs:</strong> ${carbs} g</p>` : ""}
+    ${protein ? `<p><strong>Protein:</strong> ${protein} g</p>` : ""}
+  </div>
+</section>`;
+
+  document.getElementById('output').textContent = cardHTML;
+});
+</script>
+
+</body>
+</html>

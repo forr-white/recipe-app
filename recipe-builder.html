@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Recipe Builder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="builder-header">
+  <a href="index.html"><img src="images/logo.svg" alt="Replace Your Logo Here"></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="recipe-builder.html">Recipe Builder</a>
+    <a href="https://cookanythingkitchen.com/license.html">License</a>
+  </div>
+  <h1 class="recipe-builder">Recipe Builder</h1>
+</header>
+
+<section id="builder" class="cta">
+  <div class="cta-left">
+    <h3>Create a New Recipe</h3>
+    <nav><a href="index.html">Home</a></nav>
+    <p>Fill out the form below to generate a custom recipe page.</p>
+    <p>Recipes will show up at the top of the homepage. They will be available to view within 30–60 seconds.</p>
+  </div>
+
+  <div class="cta-right">
+    <label for="new-name">Recipe Name</label>
+    <input type="text" id="new-name">
+
+    <label for="credit">Submitted by (optional):</label>
+    <input type="text" id="credit" name="credit" placeholder="Your name or source">
+
+    <label for="new-image">Image URL (optional)</label>
+    <input type="text" id="new-image" placeholder="https://example.com/recipe.jpg">
+
+    <label for="new-category">Category</label>
+    <select id="new-category">
+      <option value="">Select a Category</option>
+      <option value="appetizers">Appetizers</option>
+      <option value="bread">Bread</option>
+      <option value="breakfast">Breakfast</option>
+      <option value="desserts">Desserts</option>
+      <option value="dinner">Dinner</option>
+      <option value="drinks">Drinks</option>
+      <option value="lunch">Lunch</option>
+      <option value="salads">Salads</option>
+      <option value="sauce">Sauce</option>
+      <option value="sides">Sides</option>
+      <option value="snacks">Snacks</option>
+      <option value="soups">Soups</option>
+    </select>
+
+    <label for="new-cuisine">Cuisine</label>
+    <input type="text" id="new-cuisine" placeholder="e.g. Italian, Mexican, American">
+
+    <label for="new-tags">Tags (comma separated)</label>
+    <input type="text" id="new-tags" placeholder="e.g. easy, gluten-free, family">
+
+    <label for="new-ingredients">Ingredients (one per line)</label>
+    <textarea id="new-ingredients"></textarea>
+
+    <label for="new-directions">Directions (one step per line)</label>
+    <textarea id="new-directions"></textarea>
+
+    <label for="new-notes">Notes (optional, one per line)</label>
+    <textarea id="new-notes"></textarea>
+
+    <div class="nutrition-inputs">
+      <h3>Nutrition (optional)</h3>
+      <label>Serving Size</label>
+      <input type="text" id="nutrition-serving-size" placeholder="e.g. 1 serving">
+
+      <label>Calories</label>
+      <input type="text" id="nutrition-calories" placeholder="e.g. 230">
+
+      <label>Fat (g)</label>
+      <input type="text" id="nutrition-fat" placeholder="e.g. 8">
+
+      <label>Carbs (g)</label>
+      <input type="text" id="nutrition-carbs" placeholder="e.g. 27">
+
+      <label>Protein (g)</label>
+      <input type="text" id="nutrition-protein" placeholder="e.g. 5">
+    </div>
+
+    <button id="generate-btn">Generate & Save Recipe</button>
+  </div>
+</section>
+
+<script>
+const generateBtn = document.getElementById("generate-btn");
+
+generateBtn.addEventListener("click", async () => {
+  const name = document.getElementById("new-name").value.trim();
+  const credit = document.getElementById("credit").value.trim();
+  const image = document.getElementById("new-image").value.trim();
+  const category = document.getElementById("new-category").value;
+  const cuisine = document.getElementById("new-cuisine").value.trim();
+  const tagsArray = document.getElementById("new-tags").value.split(",").map(t => t.trim()).filter(Boolean);
+  const tags = tagsArray.join(", ");
+  const ingredients = document.getElementById("new-ingredients").value.split("\n").map(i => i.trim()).filter(Boolean);
+  const directions = document.getElementById("new-directions").value.split("\n").map(d => d.trim()).filter(Boolean);
+  const notes = document.getElementById("new-notes").value.split("\n").map(n => n.trim()).filter(Boolean);
+  const nutrition = {
+    servingSize: document.getElementById("nutrition-serving-size").value,
+    calories: document.getElementById("nutrition-calories").value,
+    fat: document.getElementById("nutrition-fat").value,
+    carbs: document.getElementById("nutrition-carbs").value,
+    protein: document.getElementById("nutrition-protein").value
+  };
+
+  if (!name || !category || ingredients.length === 0 || directions.length === 0) {
+    alert("Please fill in at least the name, category, ingredients, and directions.");
+    return;
+  }
+
+  const filename = `${name.replace(/\s+/g, "-").toLowerCase()}.html`;
+  const link = `recipes/${filename}`;
+
+  const form = new FormData();
+  form.append('name', name);
+  form.append('credit', credit); // ✅ NEW FIELD
+  form.append('category', category);
+  form.append('link', link);
+  form.append('cuisine', cuisine);
+  form.append('tags', tags);
+  form.append('image', image);
+  form.append('ingredients', JSON.stringify(ingredients));
+  form.append('directions', JSON.stringify(directions));
+  form.append('notes', JSON.stringify(notes));
+  form.append('nutrition_serving_size', nutrition.servingSize);
+  form.append('nutrition_calories', nutrition.calories);
+  form.append('nutrition_fat', nutrition.fat);
+  form.append('nutrition_carbs', nutrition.carbs);
+  form.append('nutrition_protein', nutrition.protein);
+
+  try {
+    const resp = await fetch("Sheet Deployment Here", {
+      method: "POST",
+      body: form
+    });
+
+    const result = await resp.json();
+    if (result.status === "success") {
+      alert("✅ Recipe successfully pushed to GitHub!");
+    } else if (result.status === "partial") {
+      alert("⚠️ Saved to sheet, but GitHub upload failed: " + (result.message || "Unknown error"));
+    } else {
+      alert("❌ Error saving recipe: " + (result.message || "Unknown"));
+    }
+
+  } catch (err) {
+    alert("Network or server error: " + err.message);
+    console.error(err);
+  }
+
+  // Clear inputs after submission
+  document.querySelectorAll(
+    "#new-name, #credit, #new-image, #new-category, #new-cuisine, #new-tags, #new-ingredients, #new-directions, #new-notes, #nutrition-serving-size, #nutrition-calories, #nutrition-fat, #nutrition-carbs, #nutrition-protein"
+  ).forEach(el => el.value = "");
+});
+</script>
+
+<footer class="legal-footer">
+  <div class="legal-content">
+    <p>
+      <strong>Submission Policy:</strong> By submitting a recipe, image, or any other content through this website,
+      you grant <em>Cook Anything Kitchen</em> a perpetual, worldwide, royalty-free license to use, reproduce,
+      modify, adapt, publish, and display such content in any form, media, or technology. This includes the right
+      to feature your submissions on our website, social media, or promotional materials.
+    </p>
+  </div>
+</footer>
+
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-logo">
+      <a href="index.html"><img src="images/logo.svg" alt="Replace Your Logo Here"></a>
+    </div>
+    <div class="footer-nav">
+      <a href="index.html">Home</a>
+      <a href="recipe-builder.html">Recipe Builder</a>
+      <a href="https://cookanythingkitchen.com/license.html">License</a>
+    </div>
+    <p class="footer-copy">&copy; 2025 Cook Anything Kitchen. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="config-check.js" defer></script>
+
+</body>
+</html>
